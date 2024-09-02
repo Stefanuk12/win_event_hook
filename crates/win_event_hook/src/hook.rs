@@ -225,8 +225,10 @@ extern "system" fn __on_win_event_hook_event(
     event_time: u32,
 ) {
     // A failure here indicates a library bug! Please open an issue on GitHub!
-    let event = Event::try_from(event)
-        .unwrap_or_else(|_| panic!("Unable to identify event with value: '{}'", event));
+    let Ok(event) = Event::try_from(event) else {
+        warn!("Unable to identify event with value: '{}'", event);
+        return
+    };
     let hooks = INSTALLED_HOOKS.read().expect("Unable to obtain read lock");
     let event_data = hooks
         .get(&event_hook.0)
